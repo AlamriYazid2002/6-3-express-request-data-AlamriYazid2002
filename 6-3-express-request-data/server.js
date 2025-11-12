@@ -109,18 +109,40 @@ const app = express();
 
 
 // create server
+app.listen(3000, ()=> console.log("Listening on port 3000"));
 
 
 // Query params: /echo?name=Ali&age=22
+app.get("/echo", (req,res)=>{
+   const {name, age} = req.query;
+   if(!name || !age){
+      return res.status(400).json({ ok:false, error:"name & age required" });
+   }
+   res.json({ ok:true, name, age, msg:`Hello ${name}, you are ${age} years old` })
+});
+
 
 
 // Route params: /profile/First/Last
+app.get("/profile/:first/:last", (req,res)=>{
+   const { first, last } = req.params;
+   return res.json({ ok:true, fullName: `${first} ${last}` });
+});
 
 
 // Route param middleware example: /users/42
-
+app.param("userID", (req, res, next, userID) => {
+   const id = Number(userID);
+   if(id<0){
+      return res.status(400).json({ok:false, error:"User ID cannot be negative"})
+   }
+   req.userID = id;
+   next();
+});
 
 // Route params: /users/:userId route
-
+app.get("/users/:userID", (req, res) =>{
+   res.json({ok:true, userID: req.userID});
+});
 
 
